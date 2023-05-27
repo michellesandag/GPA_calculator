@@ -68,7 +68,26 @@ def find_letter(gpa):
 
 # Defining the finish command (exporting user's grades, classes, etc.)
 def save(*args):
-    pass
+    semester = StringVar()
+    save_window = Toplevel(window)
+    save_window.geometry("270x130+570+300")
+    save_window.title("Semester Data Entry")
+    saveframe = ttk.Frame(save_window, padding="5 5 7 7")
+    saveframe.grid(column=0, row=0, sticky=(N, W, E, S))
+    
+    save_label = ttk.Label(saveframe, text="Please enter which semester the \npreviously entered data corresponds to", style="Custom.TLabel")
+    save_label.grid(column=0, row=0, sticky=N, columnspan = 2)
+    
+    
+    semester_label = ttk.Label(save_window, text="Semester:", style="LeftPadded.TLabel").grid(column=0, row=1, sticky=W)
+    
+    semester_entry = ttk.Entry(save_window, width = 10, textvariable=semester).grid(column=0, row=1, sticky = E)
+    
+    save_button = ttk.Button(save_window, text="Export all to CSV", command=add).grid(column=0, row=2)
+    save_window.bind("<Return>", add)
+
+    
+    
 '''
     with open(semesterfile, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
@@ -81,6 +100,8 @@ def save(*args):
 # Create the main window
 window = Tk()
 window.title("GPA Calculator")
+window.geometry("+500+200")
+
 
 mainframe = ttk.Frame(window, padding="3 3 5 5") #, padding="3 3 5 5"
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
