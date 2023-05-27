@@ -74,7 +74,7 @@ def finish(*args):
 window = Tk()
 window.title("GPA Calculator")
 
-mainframe = ttk.Frame(window) #, padding="3 3 5 5"
+mainframe = ttk.Frame(window, padding="3 3 5 5") #, padding="3 3 5 5"
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 
 
@@ -148,7 +148,7 @@ ttk.Label(mainframe, textvariable=str_average_grade).grid(column=0, row=7, stick
 ttk.Label(mainframe, text="Average GPA:", style="LeftPadded.TLabel").grid(column=2, row=7, sticky=E)
 ttk.Label(mainframe, textvariable=str_average_gpa).grid(column=3, row=7, sticky=W)
 
-#Finish semester button (export data to csv file)
-ttk.Button(mainframe, text="Finish", command=finish, width=7).grid(column=3, row=8, sticky=W)
+#Save semester button (export data to csv file)
+ttk.Button(mainframe, text="Save", command=finish, width=7).grid(column=3, row=8, sticky=W)
 
 window.mainloop()
