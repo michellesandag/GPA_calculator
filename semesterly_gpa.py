@@ -10,6 +10,7 @@ My preliminary GPA calculator code
 
 from tkinter import *
 from tkinter import ttk
+import csv
 
 # Defining the add command (user adds their grade for a class)
 def add(*args):
@@ -66,9 +67,16 @@ def find_letter(gpa):
             break  # Exit the loop after finding the first match
 
 # Defining the finish command (exporting user's grades, classes, etc.)
-def finish(*args):
+def save(*args):
     pass
+'''
+    with open(semesterfile, 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
 
+    # Write the data to the CSV file
+    for row in data:
+        writer.writerow(row)
+'''
 
 # Create the main window
 window = Tk()
@@ -95,10 +103,8 @@ all_gpa_points = []
 all_credits = []
 
 # Create section to input grades for this semester
-semester = StringVar()
-semester.set("1")
-ttk.Label(mainframe, text="Input grades for semester #", style="LeftPadded.TLabel").grid(column=0, row=1, sticky=W)
-ttk.Label(mainframe, textvariable=semester).grid(column=1, row=1)
+
+ttk.Label(mainframe, text="Input grades for a semester", style="LeftPadded.TLabel").grid(column=0, row=1, sticky=W)
 
 ttk.Label(mainframe, text="Class name", style="LeftPadded.TLabel").grid(column=0, row=2, columnspan=2)
 ttk.Label(mainframe, text="Grade").grid(column=2, row=2)
@@ -120,8 +126,7 @@ ttk.Button(mainframe, text="Add", command=add, width=3).grid(column=3, row=4, st
 window.bind("<Return>", add)
 
 # Create semester message
-ttk.Label(mainframe, text="Your grades for semester #", style="LeftPadded.TLabel").grid(column=0, row=5, sticky=W)
-ttk.Label(mainframe, textvariable=semester).grid(column=1, row=5)
+ttk.Label(mainframe, text="Your grades for chosen semester", style="LeftPadded.TLabel").grid(column=0, row=5, sticky=W)
 
 # Create the table
 treeview = ttk.Treeview(mainframe, columns=('Class Name', 'Grade', 'GPA Points'), show='headings')
@@ -149,6 +154,6 @@ ttk.Label(mainframe, text="Average GPA:", style="LeftPadded.TLabel").grid(column
 ttk.Label(mainframe, textvariable=str_average_gpa).grid(column=3, row=7, sticky=W)
 
 #Save semester button (export data to csv file)
-ttk.Button(mainframe, text="Save", command=finish, width=7).grid(column=3, row=8, sticky=W)
+ttk.Button(mainframe, text="Save", command=save, width=7).grid(column=3, row=8, sticky=W)
 
 window.mainloop()
