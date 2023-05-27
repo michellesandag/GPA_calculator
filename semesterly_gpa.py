@@ -21,9 +21,21 @@ def add(*args):
     gpa_points = float(find_gpa(grade_val)) * float(credit_val)
     all_gpa_points.append(gpa_points)
     gpa_val = find_gpa(grade_val)
+    checks = [(H_check, "H"), (S_check, "S"), (N_check, "N"), (Q_check, "Q"), (E_check, "E"), (W_check, "W")]
+
+    # Iterate over the checkbuttons and set their values
+    for check, label in checks:
+        if check.get() == label:
+            check.set("")
+        else:
+            check.set(label)
+            
+    desig_val = H_check.get() + S_check.get() + N_check.get() + Q_check.get()
+    desig_val += E_check.get() + W_check.get()
     if class_name_val and grade_val:
         gpa_dict[class_name_val] = float(gpa_val)
-        treeview.insert('', 'end', values=(class_name_val, grade_val, gpa_points))
+        treeview.insert('', 'end', 
+                        values=(class_name_val, desig_val, grade_val, gpa_points))
         class_name.set("")
         grade.set('')
         credit.set('')
@@ -66,26 +78,32 @@ def find_letter(gpa):
             return key  
             break  # Exit the loop after finding the first match
 
-# Defining the finish command (exporting user's grades, classes, etc.)
+# Defining function for prompting user for semester number and permission to
+# export all data to CSV file
 def save(*args):
-    semester = StringVar()
+    
+    # Open a new window
     save_window = Toplevel(window)
     save_window.geometry("270x130+570+300")
     save_window.title("Semester Data Entry")
     saveframe = ttk.Frame(save_window, padding="5 5 7 7")
     saveframe.grid(column=0, row=0, sticky=(N, W, E, S))
     
+    # Ask user to input semester number
     save_label = ttk.Label(saveframe, text="Please enter which semester the \npreviously entered data corresponds to", style="Custom.TLabel")
     save_label.grid(column=0, row=0, sticky=N, columnspan = 2)
+    semester_label = ttk.Label(save_window, text="Semester #", style="LeftPadded.TLabel").grid(column=0, row=1, sticky=W)
     
+    semester = StringVar()
+    semester_entry = ttk.Entry(save_window, width = 10, textvariable=semester)
+    semester_entry.grid(column=0, row=1, sticky = E)
+    semester_entry.focus()
     
-    semester_label = ttk.Label(save_window, text="Semester:", style="LeftPadded.TLabel").grid(column=0, row=1, sticky=W)
-    
-    semester_entry = ttk.Entry(save_window, width = 10, textvariable=semester).grid(column=0, row=1, sticky = E)
-    
-    save_button = ttk.Button(save_window, text="Export all to CSV", command=add).grid(column=0, row=2)
-    save_window.bind("<Return>", add)
+    save_button = ttk.Button(save_window, text="Export all to CSV", command=export).grid(column=0, row=2)
+    save_window.bind("<Return>", export)
 
+def export(*args):
+    pass
     
     
 '''
@@ -127,38 +145,70 @@ all_credits = []
 
 ttk.Label(mainframe, text="Input grades for a semester", style="LeftPadded.TLabel").grid(column=0, row=1, sticky=W)
 
-ttk.Label(mainframe, text="Class name", style="LeftPadded.TLabel").grid(column=0, row=2, columnspan=2)
-ttk.Label(mainframe, text="Grade").grid(column=2, row=2)
-ttk.Label(mainframe, text="Credits").grid(column=3, row=2, sticky=W)
+ttk.Label(mainframe, text="Class name", style="LeftPadded.TLabel").grid(column=0, row=2, sticky=W)
+ttk.Label(mainframe, text="Grade").grid(column=1, row=2, sticky=W)
+ttk.Label(mainframe, text="Credits").grid(column=2, row=2, sticky=W)
 
 class_name = StringVar()
-class_entry = ttk.Entry(mainframe, width=20, textvariable=class_name)
+class_entry = ttk.Entry(mainframe, textvariable=class_name) #, width=20
 class_entry.grid(column=0, row=3, sticky=W, columnspan=4)
+class_entry.focus()
 
 grade = StringVar()
-grade_entry = ttk.Entry(mainframe, width=5, textvariable=grade)
-grade_entry.grid(column=2, row=3)
+grade_entry = ttk.Entry(mainframe, textvariable=grade, width=5) #, width=5
+grade_entry.grid(column=1, row=3, sticky=W)
 
 credit = StringVar()
-credit_entry = ttk.Entry(mainframe, width=5, textvariable=credit)
-credit_entry.grid(column=3, row=3, columnspan=2, sticky=W)
+credit_entry = ttk.Entry(mainframe, width=5,textvariable=credit)  #width=5,
+credit_entry.grid(column=2, row=3, columnspan=2, sticky=W)
 
-ttk.Button(mainframe, text="Add", command=add, width=3).grid(column=3, row=4, sticky=W)
+# Create section to input grades for this semester
+ttk.Label(mainframe, text="Designation:", style="LeftPadded.TLabel").grid(column=0, row=4, sticky=W)
+
+H_check = StringVar(value="H")
+H_designation = ttk.Checkbutton(mainframe, text="H", variable=H_check)
+H_designation.grid(column=0, row=5, sticky=W)
+
+
+S_check = StringVar(value="S")
+S_designation = ttk.Checkbutton(mainframe, text="S", variable=S_check)
+S_designation.grid(column=0, row=6, sticky=W)
+
+N_check = StringVar(value="N")
+N_designation = ttk.Checkbutton(mainframe, text="N", variable=N_check)
+N_designation.grid(column=0, row=5, sticky=(N,S))
+
+Q_check = StringVar(value="Q")
+Q_designation = ttk.Checkbutton(mainframe, text="Q", variable=Q_check)
+Q_designation.grid(column=0, row=6, sticky=(N,S))
+
+E_check = StringVar(value="E")
+E_designation = ttk.Checkbutton(mainframe, text="E", variable=E_check)
+E_designation.grid(column=0, row=5, sticky=E)
+
+W_check = StringVar(value="W")
+W_designation = ttk.Checkbutton(mainframe, text="W", variable=W_check)
+W_designation.grid(column=0, row=6, sticky=E)
+
+
+ttk.Button(mainframe, text="Add", command=add, width=3).grid(column=2, row=11, sticky=W)
 window.bind("<Return>", add)
 
 # Create semester message
-ttk.Label(mainframe, text="Your grades for chosen semester", style="LeftPadded.TLabel").grid(column=0, row=5, sticky=W)
+ttk.Label(mainframe, text="Your grades for chosen semester", style="LeftPadded.TLabel").grid(column=0, row=12, sticky=W)
 
 # Create the table
-treeview = ttk.Treeview(mainframe, columns=('Class Name', 'Grade', 'GPA Points'), show='headings')
-treeview.column('Grade', width=70) 
-treeview.heading('Class Name', text='Class Name')
-treeview.column('Class Name', width=150) 
+treeview = ttk.Treeview(mainframe, columns=('Class Name', 'Desig.', 'Grade', 'GPA Points'), show='headings')
+treeview.column('Grade', width=40) 
 treeview.heading('Grade', text='Grade')
+treeview.column('Class Name', width=150) 
+treeview.heading('Class Name', text='Class Name')
 treeview.column('GPA Points', width=70)
 treeview.heading('GPA Points', text='GPA Points')
+treeview.column('Desig.', width=40)
+treeview.heading('Desig.', text='Desig.')
 
-treeview.grid(column=0, row=6, columnspan=6, sticky=(N, S, W, E))
+treeview.grid(column=0, row=12, columnspan=6, sticky=(N, S, W, E))
 
 # Find average GPA and letter grade
 average_gpa = calculate_average_gpa()
@@ -169,12 +219,12 @@ str_average_gpa = StringVar()
 str_average_grade.set(str(average_grade))
 str_average_gpa.set(f"{average_gpa:.2f}")
 
-ttk.Label(mainframe, text="Average Grade:", style="LeftPadded.TLabel").grid(column=0, row=7, sticky=W)
-ttk.Label(mainframe, textvariable=str_average_grade).grid(column=0, row=7, sticky=E)
-ttk.Label(mainframe, text="Average GPA:", style="LeftPadded.TLabel").grid(column=2, row=7, sticky=E)
-ttk.Label(mainframe, textvariable=str_average_gpa).grid(column=3, row=7, sticky=W)
+ttk.Label(mainframe, text="Average Grade:", style="LeftPadded.TLabel").grid(column=0, row=13, sticky=W)
+ttk.Label(mainframe, textvariable=str_average_grade).grid(column=0, row=13, sticky=(N,S,E))
+ttk.Label(mainframe, text="Average GPA:", style="LeftPadded.TLabel").grid(column=1, row=13, sticky=E)
+ttk.Label(mainframe, textvariable=str_average_gpa).grid(column=2, row=13, sticky=W)
 
 #Save semester button (export data to csv file)
-ttk.Button(mainframe, text="Save", command=save, width=7).grid(column=3, row=8, sticky=W)
+ttk.Button(mainframe, text="Save", command=save, width=7).grid(column=2, row=14, sticky=W)
 
 window.mainloop()
