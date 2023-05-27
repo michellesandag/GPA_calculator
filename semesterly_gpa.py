@@ -11,9 +11,10 @@ My preliminary GPA calculator code
 from tkinter import *
 from tkinter import ttk
 import csv
+from functools import partial
 
 # Defining the add command (user adds their grade for a class)
-def add(*args):
+def add():
     class_name_val = class_name.get()
     grade_val = grade.get()
     credit_val = credit.get()
@@ -25,15 +26,16 @@ def add(*args):
 
     # Iterate over the checkbuttons and set their values
     for check, label in checks:
-        if check.get() == label:
-            check.set("")
-        else:
+        if check.get() == "1":
             check.set(label)
+        else:
+            check.set("")
             
     desig_val = H_check.get() + S_check.get() + N_check.get() + Q_check.get()
     desig_val += E_check.get() + W_check.get()
+    all_desigs.append(desig_val)
     if class_name_val and grade_val:
-        gpa_dict[class_name_val] = float(gpa_val)
+        gpa_dict[class_name_val] = grade_val
         treeview.insert('', 'end', 
                         values=(class_name_val, desig_val, grade_val, gpa_points))
         class_name.set("")
@@ -76,44 +78,49 @@ def find_letter(gpa):
     for key, value in gpa_letter.items():
         if gpa == value:
             return key  
-            break  # Exit the loop after finding the first match
+        if gpa < value:
+            continue
+        if gpa > value:
+            return key
+            
+def export(semester_number):
+    semesterfile = f"semester_{semester_number}_data.csv"
+    with open(semesterfile, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
 
-# Defining function for prompting user for semester number and permission to
-# export all data to CSV file
-def save(*args):
-    
+        all_data = []
+        counter = 0
+        for class_name, grade in gpa_dict.items():
+            all_data.append([class_name, grade, all_gpa_points[counter], 
+                            all_credits[counter], all_desigs[counter]])
+            counter += 1
+
+        # Write the data to the CSV file
+        writer.writerow(['Class Name', 'Grade', 'GPA Points', 'Credits', 'Designation'])
+        writer.writerows(all_data)
+        writer.writerow(['Average Grade', str_average_grade.get(),'Average GPA', str_average_gpa.get(), '-'])
+
+def save():
     # Open a new window
     save_window = Toplevel(window)
     save_window.geometry("270x130+570+300")
     save_window.title("Semester Data Entry")
     saveframe = ttk.Frame(save_window, padding="5 5 7 7")
     saveframe.grid(column=0, row=0, sticky=(N, W, E, S))
-    
+
     # Ask user to input semester number
     save_label = ttk.Label(saveframe, text="Please enter which semester the \npreviously entered data corresponds to", style="Custom.TLabel")
-    save_label.grid(column=0, row=0, sticky=N, columnspan = 2)
+    save_label.grid(column=0, row=0, sticky=N, columnspan=2)
     semester_label = ttk.Label(save_window, text="Semester #", style="LeftPadded.TLabel").grid(column=0, row=1, sticky=W)
-    
+
     semester = StringVar()
-    semester_entry = ttk.Entry(save_window, width = 10, textvariable=semester)
-    semester_entry.grid(column=0, row=1, sticky = E)
+    semester_entry = ttk.Entry(save_window, width=10, textvariable=semester)
+    semester_entry.grid(column=0, row=1, sticky=E)
     semester_entry.focus()
-    
-    save_button = ttk.Button(save_window, text="Export all to CSV", command=export).grid(column=0, row=2)
-    save_window.bind("<Return>", export)
 
-def export(*args):
-    pass
-    
-    
-'''
-    with open(semesterfile, 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile)
-
-    # Write the data to the CSV file
-    for row in data:
-        writer.writerow(row)
-'''
+    export_command = lambda: export(semester.get())  # Create a lambda function
+    save_button = ttk.Button(save_window, text="Export all to CSV", command=export_command).grid(column=0, row=2)
+    save_window.bind("<Return>", lambda event: export_command())  # Call the lambda function
 
 # Create the main window
 window = Tk()
@@ -140,9 +147,9 @@ label.grid(column=0, row=0, sticky=N, columnspan = 6)
 gpa_dict = {}
 all_gpa_points = []
 all_credits = []
+all_desigs = []
 
 # Create section to input grades for this semester
-
 ttk.Label(mainframe, text="Input grades for a semester", style="LeftPadded.TLabel").grid(column=0, row=1, sticky=W)
 
 ttk.Label(mainframe, text="Class name", style="LeftPadded.TLabel").grid(column=0, row=2, sticky=W)
@@ -165,28 +172,28 @@ credit_entry.grid(column=2, row=3, columnspan=2, sticky=W)
 # Create section to input grades for this semester
 ttk.Label(mainframe, text="Designation:", style="LeftPadded.TLabel").grid(column=0, row=4, sticky=W)
 
-H_check = StringVar(value="H")
+H_check = StringVar(value="")
 H_designation = ttk.Checkbutton(mainframe, text="H", variable=H_check)
 H_designation.grid(column=0, row=5, sticky=W)
 
 
-S_check = StringVar(value="S")
+S_check = StringVar(value="")
 S_designation = ttk.Checkbutton(mainframe, text="S", variable=S_check)
 S_designation.grid(column=0, row=6, sticky=W)
 
-N_check = StringVar(value="N")
+N_check = StringVar(value="")
 N_designation = ttk.Checkbutton(mainframe, text="N", variable=N_check)
 N_designation.grid(column=0, row=5, sticky=(N,S))
 
-Q_check = StringVar(value="Q")
+Q_check = StringVar(value="")
 Q_designation = ttk.Checkbutton(mainframe, text="Q", variable=Q_check)
 Q_designation.grid(column=0, row=6, sticky=(N,S))
 
-E_check = StringVar(value="E")
+E_check = StringVar(value="")
 E_designation = ttk.Checkbutton(mainframe, text="E", variable=E_check)
 E_designation.grid(column=0, row=5, sticky=E)
 
-W_check = StringVar(value="W")
+W_check = StringVar(value="")
 W_designation = ttk.Checkbutton(mainframe, text="W", variable=W_check)
 W_designation.grid(column=0, row=6, sticky=E)
 
