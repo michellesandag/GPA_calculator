@@ -17,6 +17,7 @@ from functools import partial
 all_credits = []
 all_gpa_points = []
 all_desigs = []
+all_num = []
 gpa_dict = {}
 
 
@@ -35,6 +36,7 @@ def add():
     credit_val = credit.get()
     checks = [(H_check, "H"), (S_check, "S"), (N_check, "N"), (Q_check, "Q"),
               (E_check, "E"), (W_check, "W")]
+    class_num_val = class_num.get()
     # Iterate over the checkbuttons and set pressed checks to the corresponding
     # values above and set unpressed checks to empty strings
     for check, label in checks:
@@ -55,11 +57,12 @@ def add():
     
     if class_name_val and grade_val:
         # Add class data entry into the treeview table in row 9
-        treeview.insert('', 'end', values=(class_name_val, desig_val, 
-                                grade_val, gpa_points))
+        treeview.insert('', 'end', values=(class_name_val, class_num_val, 
+                                           f"{gpa_points:.2f}"))
         class_name.set("")
         grade.set('')
         credit.set('')
+        class_num.set('')
         
         # Recalculate average GPA and letter grade
         average_gpa = calculate_average_gpa()
@@ -205,18 +208,19 @@ def save():
                              command=export_command).grid(column=0, row=2)
     # Call the lambda function
     save_window.bind("<Return>", lambda event: export_command())
+    
 
 def main():
     
     global class_name, grade, credit, H_check, S_check, N_check, Q_check
     global E_check, W_check, treeview, str_average_gpa, str_average_grade
-    global window
+    global window, class_num
     
     # Create the main window and frame
     window = Tk()
     window.title("GPA Calculator")
     window.geometry("+500+200")
-    ttk.Frame(window, padding="3 3 5 5") #, padding="3 3 5 5"
+    mainframe = ttk.Frame(window, padding="3 3 5 5") #, padding="3 3 5 5"
     mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
     
     
@@ -244,24 +248,31 @@ def main():
     
     ttk.Label(mainframe, text="Class name", 
               style="LeftPadded.TLabel").grid(column=0, row=2, sticky=W)
-    ttk.Label(mainframe, text="Grade").grid(column=1, row=2, sticky=W)
+    ttk.Label(mainframe, text="Number").grid(column=1, row=2, sticky=W)
+    ttk.Label(mainframe, text="Grade").grid(column=1, row=2, sticky=E)
     ttk.Label(mainframe, text="Credits").grid(column=2, row=2, sticky=W)
     
     # Class name entry
     class_name = StringVar()
-    class_entry = ttk.Entry(mainframe, textvariable=class_name)
+    class_entry = ttk.Entry(mainframe, textvariable=class_name , width=25)
     class_entry.grid(column=0, row=3, sticky=W, columnspan=4)
     class_entry.focus()
     
+    # Class number entry
+    class_num = StringVar()
+    num_entry = ttk.Entry(mainframe, width=10,textvariable=class_num)
+    num_entry.grid(column=1, row=3, sticky=W)
+    
     # Grade entry
     grade = StringVar()
-    grade_entry = ttk.Entry(mainframe, textvariable=grade, width=5)
-    grade_entry.grid(column=1, row=3, sticky=W)
+    grade_entry = ttk.Entry(mainframe, textvariable=grade, width=3)
+    grade_entry.grid(column=1, row=3, sticky=E)
     
     # Credits entry
     credit = StringVar()
     credit_entry = ttk.Entry(mainframe, width=5,textvariable=credit) 
-    credit_entry.grid(column=2, row=3, columnspan=2, sticky=W)
+    credit_entry.grid(column=2, row=3, sticky=W)
+    
     
     # Create section to input grades for this semester
     ttk.Label(mainframe, text="Designation:", 
@@ -309,16 +320,14 @@ def main():
     
     # Create the table
     treeview = ttk.Treeview(mainframe, 
-                            columns=('Class Name', 'Desig.', 'Grade', 'GPA Points'), 
+                            columns=('Class Name', 'Number', 'GPA Points'), 
                             show='headings')
-    treeview.column('Grade', width=40) 
-    treeview.heading('Grade', text='Grade')
     treeview.column('Class Name', width=150) 
     treeview.heading('Class Name', text='Class Name')
     treeview.column('GPA Points', width=70)
     treeview.heading('GPA Points', text='GPA Points')
-    treeview.column('Desig.', width=40)
-    treeview.heading('Desig.', text='Desig.')
+    treeview.column('Number', width=40)
+    treeview.heading('Number', text='Number')
     
     treeview.grid(column=0, row=9, columnspan=6, sticky=(N, S, W, E))
     
