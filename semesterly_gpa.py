@@ -54,6 +54,7 @@ def add():
     all_gpa_points.append(gpa_points)
     all_desigs.append(desig_val)
     gpa_dict[class_name_val] = grade_val
+    all_num.append(class_num_val)
     
     if class_name_val and grade_val:
         # Add class data entry into the treeview table in row 9
@@ -158,12 +159,13 @@ def export(semester_number):
         counter = 0
         # Saves each individual data entry as a row in all_data list
         for class_name, grade in gpa_dict.items():
-            all_data.append([class_name, grade, all_gpa_points[counter], 
+            all_data.append([class_name, all_num[counter], 
+                             f"{all_gpa_points[counter]:.2f}", 
                             all_credits[counter], all_desigs[counter]])
             counter += 1
 
         # Write the data to the CSV file
-        writer.writerow(['Class Name', 'Grade', 'GPA Points', 
+        writer.writerow(['Class Name', 'Number', 'GPA Points', 
                          'Credits', 'Designation'])
         writer.writerows(all_data)
         writer.writerow(['Average Grade', str_average_grade.get(),
