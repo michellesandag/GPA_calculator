@@ -4,7 +4,11 @@
 """
 Created on Wed May 24 20:57:05 2023
 
-My preliminary GPA calculator code
+This script is a GPA calculator application built using the tkinter library 
+in Python. It provides a graphical user interface (GUI) for users to input 
+their class names, class numbers, grades and credits and calculates the GPA 
+based on the entered data. It also provides the option to export the data 
+to a CSV file.
 
 @author: michellesandag
 """
@@ -156,7 +160,7 @@ def find_letter(gpa):
         if gpa >= value:
             return key
             
-def export(semester_number, data_retrieval, str_average_gpa, str_average_grade):
+def export(semester_number, username, data_retrieval, str_average_gpa, str_average_grade):
     """
     Exports all data to a CSV file
 
@@ -180,7 +184,7 @@ def export(semester_number, data_retrieval, str_average_gpa, str_average_grade):
 
 
     # Exports in a file named semester_#.csv
-    semesterfile = f"semester_{semester_number}.csv"
+    semesterfile = f"{username}_semester_{semester_number}.csv"
     with open(semesterfile, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         all_data = []
@@ -226,31 +230,40 @@ def save(window, data_retrieval, str_average_gpa, str_average_grade):
     
     # Open a new window
     save_window = Toplevel(window)
-    save_window.geometry("270x130+570+300")
+    save_window.geometry("300x170+570+300")
     save_window.title("Semester Data Entry")
     saveframe = ttk.Frame(save_window, padding="5 5 7 7")
     saveframe.grid(column=0, row=0, sticky=(N, W, E, S))
 
-    # Ask user to input semester number
+    # Ask user to input username and semester number
     save_label = ttk.Label(saveframe, 
-                           text="Please enter which semester the \n" + 
-                           "previously entered data corresponds to",
+                           text="Please enter username and which semester\n" + 
+                           "the previously entered data corresponds to",
                            style="Custom.TLabel")
     save_label.grid(column=0, row=0, sticky=N, columnspan=2)
+    user_label = ttk.Label(save_window, text="Username", 
+                               style="LeftPadded.TLabel")
+    
+    user_label.grid(column=0, row=1, sticky=W)
+    
     semester_label = ttk.Label(save_window, text="Semester #", 
                                style="LeftPadded.TLabel")
-    semester_label.grid(column=0, row=1, sticky=W)
-    # Save semester number in a variable
+    semester_label.grid(column=0, row=2, sticky=W)
+    # Save username and semester number in a variable
+    username = StringVar()
+    user_entry = ttk.Entry(save_window, width=10, textvariable=username)
+    user_entry.grid(column=0, row=1, sticky=E)
+    user_entry.focus()
+    
     semester = StringVar()
     semester_entry = ttk.Entry(save_window, width=10, textvariable=semester)
-    semester_entry.grid(column=0, row=1, sticky=E)
-    semester_entry.focus()
+    semester_entry.grid(column=0, row=2, sticky=E)
     
     # Define a command for calling export function and apply to save button
-    export_command = lambda: export(semester.get(), data_retrieval, 
+    export_command = lambda: export(semester.get(), username.get(), data_retrieval, 
                                     str_average_gpa, str_average_grade) 
     save_button = ttk.Button(save_window, text="Export all to CSV", 
-                             command=export_command).grid(column=0, row=2)
+                             command=export_command).grid(column=0, row=3)
     # Bind return key to export function
     save_window.bind("<Return>", lambda event: export_command())
     
