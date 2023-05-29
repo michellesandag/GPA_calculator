@@ -11,14 +11,14 @@ Main application: connected to GPA_calculator and req_tracker
 import tkinter as tk
 from tkinter.constants import N,W,E,S
 from tkinter import ttk
-import csv
 import os #for working with directory paths
 import re #for matching regexes
+import subprocess #for running other python scripts
 
 def create_widgets(mainframe):
     
     # Create welcome message at top of window
-    label = tk.Label(mainframe, text="Welcome to requirement tracker!", 
+    label = tk.Label(mainframe, text="Welcome to cumulative GPA and requirement tracker!", 
                        bg="lightblue", padx="15", pady="15") #, fg="white")
     label.grid(column=0, row=0, sticky=N, columnspan = 6)
     
@@ -32,14 +32,17 @@ def create_widgets(mainframe):
     user_entry.grid(column=1, row=1, sticky=W, padx=(15,15))
     
     # Retrieve data button
-    retrieve_command = lambda: retrieve_data(username.get(), mainframe)
+    retrieve_command = lambda: retrieve_data(username.get(), mainframe, 
+                                             user_entry, retrieve_button)
     retrieve_button = tk.Button(mainframe, text="Retrieve data", 
                                 bg="lightblue", width=10,
                                 highlightbackground="lightblue",
                                  command=retrieve_command)
     retrieve_button.grid(column=1, row=2, sticky=E, padx=(15,15))
     
-def retrieve_data(name, frame):
+def retrieve_data(name, frame, entry, button):
+    entry.config(state=tk.DISABLED)
+    button.config(state=tk.DISABLED)
     
     match_num = 0
     folder_path = os.getcwd()
@@ -60,14 +63,12 @@ def retrieve_data(name, frame):
                                  bg="lightblue", padx="25")
         unmatch_label.grid(column=0, row=4, sticky=W)
     else:
-        continue_command = lambda: continue_function(name, frame)
         continue_button = tk.Button(frame, text="Continue", 
                                     bg="lightblue", width=10,
                                     highlightbackground="lightblue",
                                      command=continue_command)
         continue_button.grid(column=1, row=5+match_num, sticky=E, padx=(15,15),
                              pady = (0, 15))
-    add_command = lambda: add(name, frame)
     add_button = tk.Button(frame, text="Add GPA data", 
                                 bg="lightblue", width=10,
                                 highlightbackground="lightblue",
@@ -75,12 +76,13 @@ def retrieve_data(name, frame):
     add_button.grid(column=0, row=5+match_num, sticky=W, padx=(15,15),
                     pady = (0,15))
 
-def continue_function(*args):
-    pass
-def add(*args):
-    pass
-
-
+def continue_command():
+    # Run cumulative GPA calculator
+    subprocess.run(["python", f"{os.getcwd()}/cumulative_gpa.py"])
+    
+def add_command():
+    # Run semesterly GPA calculator
+    subprocess.run(["python", f"{os.getcwd()}/semesterly_gpa.py"])
 
 def main():
     # Create the main window and frame
