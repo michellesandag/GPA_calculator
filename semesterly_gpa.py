@@ -15,11 +15,27 @@ import csv
 from functools import partial
 
 
-def add(entry_data, check_list, data_retrieval, treeview, str_average_gpa, str_average_grade):
-    #data_retrieval = [all_credits, all_gpa_points, all_desigs, all_num, gpa_dict]
-    #entry_data = [class_name, class_num, grade, credit]
+def add(entry_data, check_list, data_retrieval, treeview, 
+        str_average_gpa, str_average_grade):
     """
     Defines the add command (allows user to add data for a class)
+
+    Parameters
+    ----------
+    entry_data : list
+        Contains class name, number, grade, and credit as entered by user.
+    check_list : list
+        Contains all designation checks (HSNEQW).
+    data_retrieval : list
+        Contains list of all credits, gpa points, designations, class numbers,
+        and dictionary of class name and grade.
+    treeview : tkinter widget
+        The table in row 9 that displays class name, class number, and gpa
+        points.
+    str_average_gpa : string
+        Average gpa of all entered classes.
+    str_average_grade : string
+        Letter grade corresponding to average gpa.
 
     Returns
     -------
@@ -33,7 +49,9 @@ def add(entry_data, check_list, data_retrieval, treeview, str_average_gpa, str_a
     grade_val = entry_data[2].get()
     credit_val = entry_data[3].get()
     
+    # Correct values of pressed and unpressed checkbuttons
     update_checks(check_list)
+    
     # Collect these designation strings in a variable
     desig_val = ""
     for item in check_list:
@@ -51,6 +69,7 @@ def add(entry_data, check_list, data_retrieval, treeview, str_average_gpa, str_a
         # Add class data entry into the treeview table in row 9
         treeview.insert('', 'end', values=(class_name_val, class_num_val, 
                                            f"{gpa_points:.2f}"))
+        # Reset variables
         entry_data[0].set("")
         entry_data[1].set('')
         entry_data[2].set('')
@@ -69,12 +88,20 @@ def calculate_average_gpa(all_credits, all_gpa_points):
     """
     Calculates average GPA
 
+    Parameters
+    ----------
+    all_credits : list
+        Contains all credits entered by the user as floats.
+    all_gpa_points : list
+        Contains gpa points for each class entered by the user as floats.
+
     Returns
     -------
     float
-        Returns the mean GPA (if user hasn't entered any classes, returns 0)
+        Returns the mean GPA (if user hasn't entered any classes, returns 0).
 
     """
+    
     if sum(all_credits)== 0:
         return 0
     else:
@@ -87,12 +114,12 @@ def find_gpa(letter_grade):
     Parameters
     ----------
     letter_grade : string
-        Letter grade to the find the GPA for
+        Letter grade to the find the GPA for.
 
     Returns
     -------
     string
-        Returns the GPA value corresponding to the entered letter_grade
+        Returns the GPA value corresponding to the entered letter_grade.
 
     """
     gpa_letter = {
@@ -109,12 +136,12 @@ def find_letter(gpa):
     Parameters
     ----------
     gpa : float
-        GPA to find the letter grade for
+        GPA to find the letter grade for.
 
     Returns
     -------
     key : string
-        Returns the letter grade corresponding to the gpa parameter
+        Returns the letter grade corresponding to the gpa parameter.
 
     """
     gpa_letter = {
@@ -130,20 +157,28 @@ def find_letter(gpa):
             return key
             
 def export(semester_number, data_retrieval, str_average_gpa, str_average_grade):
-    #data_retrieval = [all_credits, all_gpa_points, all_desigs, all_num, gpa_dict]
     """
     Exports all data to a CSV file
 
     Parameters
     ----------
     semester_number : int
-        The semester all the entered data corresponds to
+        The semester all the entered data corresponds to.
+    data_retrieval : list
+        Contains list of all credits, gpa points, designations, class numbers,
+        and dictionary of class name and grade.
+    str_average_gpa : string
+        Average gpa of all entered classes.
+    str_average_grade : string
+        Letter grade corresponding to average gpa.
 
     Returns
     -------
     None.
 
     """
+
+
     # Exports in a file named semester_#.csv
     semesterfile = f"semester_{semester_number}.csv"
     with open(semesterfile, 'w', newline='') as csvfile:
@@ -154,7 +189,8 @@ def export(semester_number, data_retrieval, str_average_gpa, str_average_grade):
         for class_name, grade in data_retrieval[4].items():
             all_data.append([class_name, data_retrieval[3][counter], 
                              f"{data_retrieval[1][counter]:.2f}", 
-                            data_retrieval[0][counter], data_retrieval[2][counter]])
+                            data_retrieval[0][counter], 
+                            data_retrieval[2][counter]])
             counter += 1
 
         # Write the data to the CSV file
@@ -169,11 +205,24 @@ def save(window, data_retrieval, str_average_gpa, str_average_grade):
     Prompts user to specify which semester the previously entered data
     corresponds to
 
+    Parameters
+    ----------
+    window : tkinter toplevel window
+        Main window of the application.
+    data_retrieval : list
+        Contains list of all credits, gpa points, designations, class numbers,
+        and dictionary of class name and grade.
+    str_average_gpa : string
+        Average gpa of all entered classes.
+    str_average_grade : string
+        Letter grade corresponding to average gpa.
+
     Returns
     -------
     None.
 
     """
+
     
     # Open a new window
     save_window = Toplevel(window)
@@ -191,20 +240,35 @@ def save(window, data_retrieval, str_average_gpa, str_average_grade):
     semester_label = ttk.Label(save_window, text="Semester #", 
                                style="LeftPadded.TLabel")
     semester_label.grid(column=0, row=1, sticky=W)
-    
+    # Save semester number in a variable
     semester = StringVar()
     semester_entry = ttk.Entry(save_window, width=10, textvariable=semester)
     semester_entry.grid(column=0, row=1, sticky=E)
     semester_entry.focus()
     
-    # Define a command for calling export(semester) and apply to save button
-    export_command = lambda: export(semester.get(), data_retrieval, str_average_gpa, str_average_grade)  # Create a lambda function
+    # Define a command for calling export function and apply to save button
+    export_command = lambda: export(semester.get(), data_retrieval, 
+                                    str_average_gpa, str_average_grade) 
     save_button = ttk.Button(save_window, text="Export all to CSV", 
                              command=export_command).grid(column=0, row=2)
-    # Call the lambda function
+    # Bind return key to export function
     save_window.bind("<Return>", lambda event: export_command())
     
 def update_checks(all_checks):
+    """
+    Set pressed checks to labelled string and sets unpressed checks to 
+    empty strings
+
+    Parameters
+    ----------
+    all_checks : list
+        Contains all designation checks (HSNEQW).
+
+    Returns
+    -------
+    None.
+
+    """
 
     checks = [(0, "H"), (1, "S"), (2, "N"), (3, "Q"),
               (4, "E"), (5, "W")]
@@ -216,6 +280,19 @@ def update_checks(all_checks):
         else:
             all_checks[check].set("")
 def disable_checks(all_checks):
+    """
+    Set all checks to their unpressed values
+
+    Parameters
+    ----------
+    all_checks : list
+        Contains all designation checks (HSNEQW).
+
+    Returns
+    -------
+    None.
+
+    """
     
     checks = [(0, "H"), (1, "S"), (2, "N"), (3, "Q"),
               (4, "E"), (5, "W")]
