@@ -14,14 +14,10 @@ from tkinter import ttk
 import csv
 from functools import partial
 
-all_credits = []
-all_gpa_points = []
-all_desigs = []
-all_num = []
-gpa_dict = {}
 
-
-def add():
+def add(entry_data, check_list, data_retrieval, treeview, str_average_gpa, str_average_grade):
+    #data_retrieval = [all_credits, all_gpa_points, all_desigs, all_num, gpa_dict]
+    #entry_data = [class_name, class_num, grade, credit]
     """
     Defines the add command (allows user to add data for a class)
 
@@ -30,50 +26,46 @@ def add():
     None.
 
     """
+    
     # Retrieves user-entered data for Class name, Grade, Credits, GPA, Desig.
-    class_name_val = class_name.get()
-    grade_val = grade.get()
-    credit_val = credit.get()
-    checks = [(H_check, "H"), (S_check, "S"), (N_check, "N"), (Q_check, "Q"),
-              (E_check, "E"), (W_check, "W")]
-    class_num_val = class_num.get()
-    # Iterate over the checkbuttons and set pressed checks to the corresponding
-    # values above and set unpressed checks to empty strings
-    for check, label in checks:
-        if check.get() == "1":
-            check.set(label)
-        else:
-            check.set("")
+    class_name_val = entry_data[0].get()
+    class_num_val = entry_data[1].get()
+    grade_val = entry_data[2].get()
+    credit_val = entry_data[3].get()
+    
+    update_checks(check_list)
     # Collect these designation strings in a variable
-    desig_val = H_check.get() + S_check.get() + N_check.get() + Q_check.get()
-    desig_val += E_check.get() + W_check.get()
+    desig_val = ""
+    for item in check_list:
+        desig_val += item.get()
     
     # Save retrieved data in lists or dictionaries
-    all_credits.append(float(credit_val))
+    data_retrieval[0].append(float(credit_val))
     gpa_points = float(find_gpa(grade_val)) * float(credit_val)
-    all_gpa_points.append(gpa_points)
-    all_desigs.append(desig_val)
-    gpa_dict[class_name_val] = grade_val
-    all_num.append(class_num_val)
+    data_retrieval[1].append(gpa_points)
+    data_retrieval[2].append(desig_val)
+    data_retrieval[3].append(class_num_val)
+    data_retrieval[4][class_name_val] = grade_val
     
     if class_name_val and grade_val:
         # Add class data entry into the treeview table in row 9
         treeview.insert('', 'end', values=(class_name_val, class_num_val, 
                                            f"{gpa_points:.2f}"))
-        class_name.set("")
-        grade.set('')
-        credit.set('')
-        class_num.set('')
+        entry_data[0].set("")
+        entry_data[1].set('')
+        entry_data[2].set('')
+        entry_data[3].set('')
+        disable_checks(check_list)
         
         # Recalculate average GPA and letter grade
-        average_gpa = calculate_average_gpa()
+        average_gpa = calculate_average_gpa(data_retrieval[0], data_retrieval[1])
         average_grade = find_letter(average_gpa)
         
         # Update the average GPA and letter grade labels
         str_average_gpa.set(f"{average_gpa:.2f}")
         str_average_grade.set(average_grade)
 
-def calculate_average_gpa():
+def calculate_average_gpa(all_credits, all_gpa_points):
     """
     Calculates average GPA
 
@@ -137,7 +129,8 @@ def find_letter(gpa):
         if gpa >= value:
             return key
             
-def export(semester_number):
+def export(semester_number, data_retrieval, str_average_gpa, str_average_grade):
+    #data_retrieval = [all_credits, all_gpa_points, all_desigs, all_num, gpa_dict]
     """
     Exports all data to a CSV file
 
@@ -158,10 +151,10 @@ def export(semester_number):
         all_data = []
         counter = 0
         # Saves each individual data entry as a row in all_data list
-        for class_name, grade in gpa_dict.items():
-            all_data.append([class_name, all_num[counter], 
-                             f"{all_gpa_points[counter]:.2f}", 
-                            all_credits[counter], all_desigs[counter]])
+        for class_name, grade in data_retrieval[4].items():
+            all_data.append([class_name, data_retrieval[3][counter], 
+                             f"{data_retrieval[1][counter]:.2f}", 
+                            data_retrieval[0][counter], data_retrieval[2][counter]])
             counter += 1
 
         # Write the data to the CSV file
@@ -171,7 +164,7 @@ def export(semester_number):
         writer.writerow(['Average Grade', str_average_grade.get(),
                          'Average GPA', str_average_gpa.get(), '-'])
 
-def save():
+def save(window, data_retrieval, str_average_gpa, str_average_grade):
     """
     Prompts user to specify which semester the previously entered data
     corresponds to
@@ -205,18 +198,37 @@ def save():
     semester_entry.focus()
     
     # Define a command for calling export(semester) and apply to save button
-    export_command = lambda: export(semester.get())  # Create a lambda function
+    export_command = lambda: export(semester.get(), data_retrieval, str_average_gpa, str_average_grade)  # Create a lambda function
     save_button = ttk.Button(save_window, text="Export all to CSV", 
                              command=export_command).grid(column=0, row=2)
     # Call the lambda function
     save_window.bind("<Return>", lambda event: export_command())
     
+def update_checks(all_checks):
+
+    checks = [(0, "H"), (1, "S"), (2, "N"), (3, "Q"),
+              (4, "E"), (5, "W")]
+    # Iterate over the checkbuttons and set pressed checks to the corresponding
+    # values above and set unpressed checks to empty strings
+    for check, label in checks:
+        if all_checks[check].get() == "1":
+            all_checks[check].set(label)
+        else:
+            all_checks[check].set("")
+def disable_checks(all_checks):
+    
+    checks = [(0, "H"), (1, "S"), (2, "N"), (3, "Q"),
+              (4, "E"), (5, "W")]
+    for check, label in checks:
+        all_checks[check].set(label)
 
 def main():
-    
-    global class_name, grade, credit, H_check, S_check, N_check, Q_check
-    global E_check, W_check, treeview, str_average_gpa, str_average_grade
-    global window, class_num
+    # Storing grades and class names
+    all_credits = []
+    all_gpa_points = []
+    all_desigs = []
+    all_num = []
+    gpa_dict = {}
     
     # Create the main window and frame
     window = Tk()
@@ -238,11 +250,6 @@ def main():
                       style="Custom.TLabel")
     label.grid(column=0, row=0, sticky=N, columnspan = 6)
     
-    # Storing grades and class names
-    gpa_dict = {}
-    all_gpa_points = []
-    all_credits = []
-    all_desigs = []
     
     # Create section to input grades for this semester
     ttk.Label(mainframe, text="Input grades for a semester",
@@ -311,10 +318,14 @@ def main():
     W_designation = ttk.Checkbutton(mainframe, text="W", variable=W_check)
     W_designation.grid(column=0, row=6, sticky=E)
     
-    # Button for adding entry to table
-    ttk.Button(mainframe, text="Add", command=add,
-               width=3).grid(column=2, row=7, sticky=W)
-    window.bind("<Return>", add)
+    entry_data = [class_name, class_num, grade, credit]
+    check_list = [H_check, S_check, N_check, Q_check, E_check, W_check]
+    data_retrieval = [all_credits, all_gpa_points, all_desigs, all_num, gpa_dict]
+    add_command = lambda: add(entry_data, check_list, data_retrieval, 
+                              treeview, str_average_gpa, str_average_grade)  # Create a lambda function
+    
+    ttk.Button(mainframe, text="Add", command=add_command, width=3).grid(column=2, row=7, sticky=W)
+    window.bind("<Return>", lambda event: add_command())
     
     # Create semester message
     ttk.Label(mainframe, text="Your grades for chosen semester", 
@@ -334,7 +345,7 @@ def main():
     treeview.grid(column=0, row=9, columnspan=6, sticky=(N, S, W, E))
     
     # Find average GPA and letter grade
-    average_gpa = calculate_average_gpa()
+    average_gpa = calculate_average_gpa(all_credits, all_gpa_points)
     average_grade = find_letter(average_gpa)
     
     str_average_grade = StringVar()
@@ -352,8 +363,9 @@ def main():
               textvariable=str_average_gpa).grid(column=2, row=10, sticky=W)
     
     #Save semester button (export data to csv file)
+    save_command = lambda: save(window, data_retrieval, str_average_gpa, str_average_grade)  # Create a lambda function
     ttk.Button(mainframe, text="Save", 
-               command=save, width=7).grid(column=2, row=11, sticky=W)
+               command=save_command, width=7).grid(column=2, row=11, sticky=W)
     
     window.mainloop()
 
