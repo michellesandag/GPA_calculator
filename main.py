@@ -47,6 +47,7 @@ def retrieve_data(name, frame, entry, button):
     match_num = 0
     folder_path = os.getcwd()
     regex_pattern = rf"{name}_semester_\d+\.csv"
+    all_files = []
     
     tk.Label(frame, text=f"GPA data found for {name} in files:", 
                        bg="lightblue", padx="15").grid(column=0, row=3, sticky=W)
@@ -57,12 +58,14 @@ def retrieve_data(name, frame, entry, button):
                                    padx="25") #, fg="white")
             match_label.grid(column=0, row=4 + match_num, sticky=W)
             match_num += 1
+            all_files.append(filename)
             
     if match_num == 0:
         unmatch_label = tk.Label(frame, text="Not found", 
                                  bg="lightblue", padx="25")
         unmatch_label.grid(column=0, row=4, sticky=W)
     else:
+        continue_command = lambda: continue_function(all_files)
         continue_button = tk.Button(frame, text="Continue", 
                                     bg="lightblue", width=10,
                                     highlightbackground="lightblue",
@@ -76,9 +79,11 @@ def retrieve_data(name, frame, entry, button):
     add_button.grid(column=0, row=5+match_num, sticky=W, padx=(15,15),
                     pady = (0,15))
 
-def continue_command():
+def continue_function(files):
     # Run cumulative GPA calculator
-    subprocess.run(["python", f"{os.getcwd()}/cumulative_gpa.py"])
+    files.sort()
+    subprocess.run(["python", f"{os.getcwd()}/cumulative_gpa.py"] + 
+                   [str(file) for file in files])
     
 def add_command():
     # Run semesterly GPA calculator
