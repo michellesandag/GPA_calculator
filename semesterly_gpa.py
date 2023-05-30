@@ -19,6 +19,7 @@ import csv
 from functools import partial
 
 
+
 def add(entry_data, check_list, data_retrieval, treeview, 
         str_average_gpa, str_average_grade):
     """
@@ -81,7 +82,8 @@ def add(entry_data, check_list, data_retrieval, treeview,
         disable_checks(check_list)
         
         # Recalculate average GPA and letter grade
-        average_gpa = calculate_average_gpa(data_retrieval[0], data_retrieval[1])
+        average_gpa = calculate_average_gpa(data_retrieval[0], 
+                                            data_retrieval[1])
         average_grade = find_letter(average_gpa)
         
         # Update the average GPA and letter grade labels
@@ -160,7 +162,8 @@ def find_letter(gpa):
         if gpa >= value:
             return key
             
-def export(semester_number, username, data_retrieval, str_average_gpa, str_average_grade):
+def export(semester_number, username, data_retrieval, str_average_gpa, 
+           str_average_grade, save_window, window):
     """
     Exports all data to a CSV file
 
@@ -203,6 +206,10 @@ def export(semester_number, username, data_retrieval, str_average_gpa, str_avera
         writer.writerows(all_data)
         writer.writerow(['Average Grade', str_average_grade.get(),
                          'Average GPA', str_average_gpa.get(), '-'])
+    csvfile.close()
+    save_window.destroy()
+    
+    
 
 def save(window, data_retrieval, str_average_gpa, str_average_grade):
     """
@@ -260,8 +267,9 @@ def save(window, data_retrieval, str_average_gpa, str_average_grade):
     semester_entry.grid(column=0, row=2, sticky=E)
     
     # Define a command for calling export function and apply to save button
-    export_command = lambda: export(semester.get(), username.get(), data_retrieval, 
-                                    str_average_gpa, str_average_grade) 
+    export_command = lambda: export(semester.get(), username.get(), 
+                                    data_retrieval, str_average_gpa, 
+                                    str_average_grade, save_window, window) 
     save_button = ttk.Button(save_window, text="Export all to CSV", 
                              command=export_command).grid(column=0, row=3)
     # Bind return key to export function
@@ -285,7 +293,7 @@ def update_checks(all_checks):
 
     checks = [(0, "H"), (1, "S"), (2, "N"), (3, "Q"),
               (4, "E"), (5, "W")]
-    # Iterate over the checkbuttons and set pressed checks to the corresponding
+    # Iterate over the checkbuttons and set pressed checks to the matching
     # values above and set unpressed checks to empty strings
     for check, label in checks:
         if all_checks[check].get() == "1":
@@ -313,6 +321,7 @@ def disable_checks(all_checks):
         all_checks[check].set(label)
 
 def main():
+    
     # Storing grades and class names
     all_credits = []
     all_gpa_points = []
@@ -410,11 +419,14 @@ def main():
     
     entry_data = [class_name, class_num, grade, credit]
     check_list = [H_check, S_check, N_check, Q_check, E_check, W_check]
-    data_retrieval = [all_credits, all_gpa_points, all_desigs, all_num, gpa_dict]
+    data_retrieval = [all_credits, all_gpa_points, 
+                      all_desigs, all_num, gpa_dict]
     add_command = lambda: add(entry_data, check_list, data_retrieval, 
-                              treeview, str_average_gpa, str_average_grade)  # Create a lambda function
+                              treeview, str_average_gpa, str_average_grade) 
     
-    ttk.Button(mainframe, text="Add", command=add_command, width=3).grid(column=2, row=7, sticky=W)
+    add_button= ttk.Button(mainframe, text="Add", 
+                           command=add_command, width=3)
+    add_button.grid(column=2, row=7, sticky=W)
     window.bind("<Return>", lambda event: add_command())
     
     # Create semester message
@@ -453,7 +465,8 @@ def main():
               textvariable=str_average_gpa).grid(column=2, row=10, sticky=W)
     
     #Save semester button (export data to csv file)
-    save_command = lambda: save(window, data_retrieval, str_average_gpa, str_average_grade)  # Create a lambda function
+    save_command = lambda: save(window, data_retrieval, 
+                                str_average_gpa, str_average_grade)  
     ttk.Button(mainframe, text="Save", 
                command=save_command, width=7).grid(column=2, row=11, sticky=W)
     
