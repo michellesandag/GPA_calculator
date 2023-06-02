@@ -65,7 +65,7 @@ def retrieve_data(name, frame, entry, button):
                                  bg="lightblue", padx="25")
         unmatch_label.grid(column=0, row=4, sticky=W)
     else:
-        continue_command = lambda: continue_function(all_files)
+        continue_command = lambda: continue_function(all_files, name)
         continue_button = tk.Button(frame, text="Continue", 
                                     bg="lightblue", width=10,
                                     highlightbackground="lightblue",
@@ -79,10 +79,10 @@ def retrieve_data(name, frame, entry, button):
     add_button.grid(column=0, row=5+match_num, sticky=W, padx=(15,15),
                     pady = (0,15))
 
-def continue_function(files):
+def continue_function(files, name):
     # Run cumulative GPA calculator
     files.sort()
-    subprocess.run(["python", f"{os.getcwd()}/cumulative_gpa.py"] + 
+    subprocess.run(["python", f"{os.getcwd()}/cumulative_gpa.py", name] + 
                    [str(file) for file in files])
     
 def add_command():
