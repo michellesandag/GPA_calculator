@@ -29,7 +29,7 @@ def find_semesters(files):
     return semester_nums
 
 def add_semester_labels(mainframe, semesters, username, all_data):
-    num_rows = 3
+    num_rows = 8
     num_columns = len(semesters) // 2 + 1
     final_col = 0
     num_semester = len(semesters)
@@ -39,8 +39,9 @@ def add_semester_labels(mainframe, semesters, username, all_data):
         num_semester -= 1
 
     col_tracker = 1
-    row_tracker = 0
+    row_tracker = 2
     sem_tracker = 0
+    avg_all_gpa = []
     
     empty_label = tk.Label(mainframe, 
                          text=" ",
@@ -52,31 +53,43 @@ def add_semester_labels(mainframe, semesters, username, all_data):
     empty_label_2.grid(column=0, row=3, sticky=W)
 
     while sem_tracker < num_semester & num_columns > col_tracker:
-            while num_rows > row_tracker:
-                avg_gpa = get_avg_gpa(sem_tracker+1, username)
-                label_text = f"Semester {semesters[sem_tracker]}: "
-                label_text += f"Average of {avg_gpa}"
-                sem_label = tk.Label(mainframe, text=label_text,
-                                     bg="lightpink", padx="15", pady="5")
-                sem_label.grid(column=col_tracker, row=2+row_tracker, sticky=W)
-                sem_table = add_sem_table(mainframe, semesters, 
-                                          col_tracker, row_tracker)
-                fill_sem_table(sem_table, sem_tracker+1, username, all_data)
-                sem_tracker += 1
-                row_tracker += 2
-            row_tracker = 0
-            col_tracker += 2
+        while num_rows > row_tracker:
+            avg_gpa = get_avg_gpa(sem_tracker+1, username, avg_all_gpa)
+            label_text = f"Semester {semesters[sem_tracker]}: "
+            label_text += f"Average of {avg_gpa}"
+            sem_label = tk.Label(mainframe, text=label_text,
+                                 bg="lightpink", padx="15", pady="5")
+            sem_label.grid(column=col_tracker, row=row_tracker, sticky=W)
+            sem_table = add_sem_table(mainframe, semesters, 
+                                      col_tracker, row_tracker)
+            fill_sem_table(sem_table, sem_tracker+1, username, all_data)
+            cumul_gpa = sum(avg_all_gpa) / len(avg_all_gpa)
+            sem_gpa_label = tk.Label(mainframe, text=f"Cumulative GPA: {cumul_gpa}",
+                                 bg="lightpink", pady="5")
+            sem_gpa_label.grid(column=col_tracker, row=row_tracker+2, sticky=W)
+            sem_tracker += 1
+            row_tracker += 4
+            
+        row_tracker = 2
+        col_tracker += 2
+
     if final_col == 1:
-        avg_gpa = get_avg_gpa(sem_tracker+1, username)
+        avg_gpa = get_avg_gpa(sem_tracker+1, username, avg_all_gpa)
         label_text = f"Semester {semesters[sem_tracker]}: "
         label_text += f"Average of {avg_gpa}"
-        sem_label = tk.Label(mainframe, text=label_text, bg="lightpink", 
-                             padx="15", pady="15")
+        sem_label = tk.Label(mainframe, text=label_text,
+                             bg="lightpink", padx="15", pady="5")
         sem_label.grid(column=col_tracker, row=2, sticky=W)
-        sem_table = add_sem_table(mainframe, semesters, col_tracker, 0)
+        
+        cumul_gpa = sum(avg_all_gpa) / len(avg_all_gpa)
+        sem_gpa_label = tk.Label(mainframe, text=f"Cumulative GPA: {cumul_gpa}",
+                             bg="lightpink", pady="5")
+        sem_gpa_label.grid(column=col_tracker, row=4, sticky=W)
+        sem_table = add_sem_table(mainframe, semesters, col_tracker, 2)
         fill_sem_table(sem_table, sem_tracker+1, username, all_data)
 
-def get_avg_gpa(sem_tracker, username):
+
+def get_avg_gpa(sem_tracker, username, avg_all_gpa):
     
     filename = username + "_semester_" + str(sem_tracker) + ".csv"
     with open(filename,'r') as csv_file:
@@ -85,6 +98,7 @@ def get_avg_gpa(sem_tracker, username):
             if i == 0: # If file is empty
                 pass # Throw exception
     csv_file.close()
+    avg_all_gpa.append(float(row[-2]))
     return row[-2]
 
 def fill_sem_table(sem_table, sem_tracker, username, all_data):
@@ -133,13 +147,11 @@ def add_sem_table(mainframe, semesters, col_tracker, row_tracker):
     treeview.column('Credits', width=40)
     treeview.heading('Credits', text='Credits')
     
-    sem_label = tk.Label(mainframe, 
-                         text=" ",
+    sem_label = tk.Label(mainframe, text=" ",
                          bg="lightpink", padx="15", pady="15")
-    sem_label.grid(column=col_tracker+1, row=row_tracker+3, sticky=W)
+    sem_label.grid(column=col_tracker+1, row=row_tracker+1, sticky=W)
     
-    treeview.grid(column=col_tracker, row=row_tracker+3, sticky=E)
-    
+    treeview.grid(column=col_tracker, row=row_tracker+1, sticky=E)
     return treeview
     
 def initialize_gui(files, username):
