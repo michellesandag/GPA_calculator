@@ -65,7 +65,7 @@ def add_semester_labels(mainframe, semesters, username, all_data):
             fill_sem_table(sem_table, sem_tracker+1, username, all_data)
             cumul_gpa = sum(avg_all_gpa) / len(avg_all_gpa)
             sem_gpa_label = tk.Label(mainframe, text=f"Cumulative GPA: {cumul_gpa}",
-                                 bg="lightpink", pady="5")
+                                 bg="pink", pady="5")
             sem_gpa_label.grid(column=col_tracker, row=row_tracker+2, sticky=W)
             sem_tracker += 1
             row_tracker += 4
@@ -83,12 +83,12 @@ def add_semester_labels(mainframe, semesters, username, all_data):
         
         cumul_gpa = sum(avg_all_gpa) / len(avg_all_gpa)
         sem_gpa_label = tk.Label(mainframe, text=f"Cumulative GPA: {cumul_gpa}",
-                             bg="lightpink", pady="5")
+                             bg="pink", pady="5")
         sem_gpa_label.grid(column=col_tracker, row=4, sticky=W)
         sem_table = add_sem_table(mainframe, semesters, col_tracker, 2)
         fill_sem_table(sem_table, sem_tracker+1, username, all_data)
 
-
+    print(all_data)
 def get_avg_gpa(sem_tracker, username, avg_all_gpa):
     
     filename = username + "_semester_" + str(sem_tracker) + ".csv"
@@ -129,7 +129,7 @@ def fill_sem_table(sem_table, sem_tracker, username, all_data):
     for j in range(len(sem_class_names)):
         sem_table.insert('', 'end', values=(sem_class_names[j], sem_desigs[j],
                                             sem_credits[j], sem_gpa_points[j]))
-    all_data.append([sem_class_names, sem_class_names, sem_class_nums, 
+    all_data.append([sem_class_names, sem_class_nums, 
                     sem_gpa_points, sem_desigs, sem_credits])
 
 def add_sem_table(mainframe, semesters, col_tracker, row_tracker):
